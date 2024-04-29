@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ebike</name>
+  <version>1.0.0</version>
+  <description>Environment-based Inverse Kinematics Enhancement</description>
+
+  <maintainer email="timon.engelke@dlr.de">Timon Engelke</maintainer>
+  <author email="timon.engelke@dlr.de">Timon Engelke</author>
+
+  <license>MIT</license>
+
+  <depend>reach</depend>
+  <depend>reach_ros</depend>
+  <depend>bio_ik</depend>
+  <depend>trac_ik</depend>
+  <depend>pick_ik</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
