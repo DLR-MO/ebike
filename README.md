@@ -38,14 +38,14 @@ This script uses the [Optuna](https://github.com/optuna/optuna) library for opti
 
 ## Scenarios
 
-|![Small table](images/ur10_small_table.png)|![Table](images/ur10_table.png)|![Kallax](images/ur10_kallax.png) |
-|:-:|:-:|:-:|
-|<sup>Small table</sup>|<sup>Table</sup>|<sup>Kallax</sup>|
+| ![Small table](images/ur10_small_table.png) | ![Table](images/ur10_table.png) | ![Kallax](images/ur10_kallax.png) | ![Barrel](images/ur10_barrel.png) |
+|:-------------------------------------------:|:-------------------------------:|:---------------------------------:|:---------------------------------:|
+|           <sup>Small table</sup>            |        <sup>Table</sup>         |         <sup>Kallax</sup>         |         <sup>Barrel</sup>         |
 
 # Results
 
 Some example results obtained from the library are shown here.
-The experiments were run on the UR10 robot with the three default scenarios.
+The experiments were run on the UR10 robot with the four default scenarios.
 
 <p float="left" align="middle">
 <img src="images/ur10_small_table_rates.png" width="49%" />
@@ -54,4 +54,6 @@ The experiments were run on the UR10 robot with the three default scenarios.
 <img src="images/ur10_table_times.png" width="49%" />
 <img src="images/ur10_kallax_rates.png" width="49%" />
 <img src="images/ur10_kallax_times.png" width="49%" />
+<img src="images/ur10_barrel_rates.png" width="49%" />
+<img src="images/ur10_barrel_times.png" width="49%" />
 </p>

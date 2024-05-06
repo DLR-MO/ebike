@@ -50,3 +50,6 @@ class SmallTable(AbstractScenario):
 
 class Kallax(AbstractScenario):
     name = 'kallax'
+
+class Barrel(AbstractScenario):
+    name = 'barrel'
