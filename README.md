@@ -26,7 +26,7 @@ Depending on the IKs you want to test, you should also clone the following:
 
 ## Usage
 
-Using the `run_benchmark.py` script, the benchmark can be started, `show_reach.launch.py` can be used for visualization.
+Using the `run_benchmark.py` script, the benchmark can be started, `visualization.launch.py` can be used for visualization.
 The library uses the [REACH](https://github.com/ros-industrial/reach) library to try to move the robot's end effector to
 certain points on the target object.
 The scenarios that are evaluated are located in the `scenarios` folder and used in the `scenario.py` file.

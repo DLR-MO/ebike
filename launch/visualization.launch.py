@@ -17,7 +17,7 @@ def declare_launch_arguments():
                               default_value=PathJoinSubstitution([FindPackageShare('ur_moveit_config'), 'srdf', 'ur.srdf'])),
         DeclareLaunchArgument("use_rviz", description="Flag indicating whether Rviz should be launchd", default_value="True"),
         DeclareLaunchArgument("rviz_config", description="Reach study Rviz configuration",
-                              default_value=PathJoinSubstitution([FindPackageShare('ebike'), 'config', 'show_reach.rviz'])),
+                              default_value=PathJoinSubstitution([FindPackageShare('ebike'), 'config', 'visualization.rviz'])),
     ]
 
 
