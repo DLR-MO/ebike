@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MIT
 
+import os
 import tempfile
+from collections import defaultdict
 
 import reach
 import reach_ros
-import os
-from collections import defaultdict
 from benchmark.visualization import plot_results
 
 
@@ -35,10 +35,14 @@ class Benchmark:
             for scenario in self.scenarios:
                 config = scenario.get_config(robot.get_planning_group())
                 for ik in self.iks:
-                    print(f"Running benchmark for {ik.name} on robot {robot.name}, scenario {scenario.name}")
+                    print(
+                        f"Running benchmark for {ik.name} on robot {robot.name}, scenario {scenario.name}"
+                    )
                     ik.set_config(robot.get_planning_group())
                     config_name = f"{robot.name} {scenario.name} {ik.name}"
-                    reach.runReachStudy(config, config_name, results_dir, self.interactive)
+                    reach.runReachStudy(
+                        config, config_name, results_dir, self.interactive
+                    )
                     db = reach.load(f"{results_dir}/{config_name}/reach.db.xml")
                     self.results[robot.name][scenario.name][ik.name] = db.results
         print(f"Results saved in {results_dir}")
