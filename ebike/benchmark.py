@@ -6,7 +6,8 @@ from collections import defaultdict
 
 import reach
 import reach_ros
-from benchmark.visualization import plot_results
+
+from ebike.visualization import plot_results
 
 
 class Benchmark:
