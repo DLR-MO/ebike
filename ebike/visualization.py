@@ -17,16 +17,13 @@ def plot_results(results):
             plt.title(f"Success rates ({robot} on {scenario})")
             plt.bar(
                 results_df.keys(),
-                [
-                    np.sum(np.where(data.reached)) / len(data)
-                    for data in results_df.values()
-                ],
+                [np.sum(data.reached == 1) / len(data) for data in results_df.values()],
             )
             plt.show()
             plt.title(f"Solve times (ms) ({robot} on {scenario})")
             plt.boxplot(
                 [
-                    data.ik_time[np.where(data.reached)] * 1000
+                    data.ik_time[data.reached == 1] * 1000
                     for data in results_df.values()
                 ],
                 labels=results_df.keys(),
