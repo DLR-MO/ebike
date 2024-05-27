@@ -7,7 +7,7 @@ from collections import defaultdict
 import reach
 import reach_ros
 
-from ebike.visualization import plot_results
+from ebike.visualization import plot_results, print_results
 
 
 class Benchmark:
@@ -51,3 +51,6 @@ class Benchmark:
 
     def plot(self):
         plot_results(self.results)
+
+    def print(self):
+        print_results(self.results)
