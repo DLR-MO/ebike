@@ -95,8 +95,10 @@ class PickIKOptuna(AbstractIK):
 class BenchmarkOptimization:
     def __init__(self):
         self.benchmark = Benchmark()
-        self.benchmark.add_robot(UR10())
-        self.benchmark.add_scenario(SmallTable())
+        self.robot = UR10()
+        self.benchmark.add_robot(self.robot)
+        self.scenario = SmallTable()
+        self.benchmark.add_scenario(self.scenario)
         self.pick_ik = PickIKOptuna()
         self.benchmark.add_ik(self.pick_ik)
 
@@ -132,9 +134,11 @@ class BenchmarkOptimization:
     def objective(self, trial):
         self.pick_ik.update_parameters(trial)
         result = self.benchmark.run()
-        result = result_to_df(result["elise"]["table"]["pick_ik_optuna"][0])
-        num_reached = np.sum(np.where(result.reached))
-        avg_ik_time = np.mean(result.ik_time[np.where(result.reached)])
+        result = result_to_df(
+            result[self.robot.name][self.scenario.name][self.pick_ik.name][0]
+        )
+        num_reached = np.sum(result.reached == 1)
+        avg_ik_time = np.mean(result.ik_time[result.reached == 1])
         trial.set_user_attr("avg_ik_time", avg_ik_time)
         return num_reached / len(result)
 
