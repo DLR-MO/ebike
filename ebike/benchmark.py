@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import os
+import sys
 import tempfile
 from collections import defaultdict
 
@@ -12,7 +13,7 @@ from ebike.visualization import plot_results, print_results
 
 class Benchmark:
     def __init__(self, interactive=False):
-        reach_ros.init_ros([])
+        reach_ros.init_ros(sys.argv)
         self.iks = []
         self.robots = []
         self.scenarios = []
