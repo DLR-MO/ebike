@@ -3,6 +3,7 @@
 
 class AbstractScenario:
     name = None
+    hole_position = []
 
     def get_config(self, planning_group):
         reach_config = {
