@@ -5,8 +5,6 @@ class AbstractScenario:
     name = None
 
     def get_config(self, planning_group):
-        ply_file = f"package://ebike/scenarios/{self.name}.ply"
-        pcd_file = f"package://ebike/scenarios/{self.name}.pcd"
         reach_config = {
             "optimization": {
                 "radius": 0.2,
@@ -18,25 +16,34 @@ class AbstractScenario:
                 "name": "MoveItIKSolver",
                 "distance_threshold": 0.0,
                 "planning_group": planning_group,
-                "collision_mesh_filename": ply_file,
+                "collision_mesh_filename": self.ply_file,
                 "touch_links": ["end_effector"],
+                "hole_position": self.hole_position,
             },
             "evaluator": {
                 "name": "NoOpEvaluator",
             },
             "display": {
                 "name": "ROSDisplay",
-                "collision_mesh_filename": ply_file,
+                "collision_mesh_filename": self.ply_file,
                 "kinematic_base_frame": "base_link",
                 "marker_scale": 0.05,
             },
             "target_pose_generator": {
                 "name": "PointCloudTargetPoseGenerator",
-                "pcd_file": pcd_file,
+                "pcd_file": self.pcd_file,
             },
             "logger": {"name": "BoostProgressConsoleLogger"},
         }
         return reach_config
+
+    @property
+    def ply_file(self):
+        return f"package://ebike/scenarios/{self.name}.ply"
+
+    @property
+    def pcd_file(self):
+        return f"package://ebike/scenarios/{self.name}.pcd"
 
 
 class Table(AbstractScenario):
