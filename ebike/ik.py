@@ -2,6 +2,8 @@
 
 import reach_ros
 
+IK_TIMEOUT = 1.0
+
 
 class AbstractIK:
     name = None
@@ -24,7 +26,7 @@ class KDL(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
 
 
@@ -42,7 +44,7 @@ class RelaxedIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
 
 
@@ -60,7 +62,7 @@ class TracIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.solve_type", "Speed"
@@ -81,7 +83,7 @@ class TracIKDistance(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.solve_type", "Distance"
@@ -102,7 +104,7 @@ class PickIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            0.5,
+            IK_TIMEOUT,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", "global"
@@ -154,7 +156,7 @@ class BioIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_attempts",

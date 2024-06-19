@@ -4,7 +4,7 @@ import optuna
 import reach_ros
 
 from ebike.benchmark import Benchmark
-from ebike.ik import AbstractIK
+from ebike.ik import IK_TIMEOUT, AbstractIK
 from ebike.robot import UR10
 from ebike.scenario import SmallTable
 from ebike.utils import result_to_df
@@ -27,7 +27,7 @@ class PickIKOptuna(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            IK_TIMEOUT,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", "global"
