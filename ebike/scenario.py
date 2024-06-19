@@ -17,7 +17,7 @@ class AbstractScenario:
                 "distance_threshold": 0.0,
                 "planning_group": planning_group,
                 "collision_mesh_filename": self.ply_file,
-                "touch_links": ["end_effector"],
+                "touch_links": ["end_effector", "endo_third_link"],
                 "hole_position": self.hole_position,
             },
             "evaluator": {
