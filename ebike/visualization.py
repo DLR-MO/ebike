@@ -48,3 +48,22 @@ def plot_results(results):
                 labels=results_df.keys(),
             )
             plt.show()
+            plt.title(f"Cumulative solve times (ms) ({robot} on {scenario})")
+            plt.ylim(0, 1)
+            max_ik_time = (
+                max([np.max(data.ik_time) for data in results_df.values()]) * 1000
+            )
+            for solver, data in results_df.items():
+                plt.plot(
+                    np.append(
+                        np.sort(data.ik_time[data.reached == 1] * 1000), max_ik_time
+                    ),
+                    np.append(
+                        np.arange(np.sum(data.reached == 1)),
+                        np.sum(data.reached == 1) - 1,
+                    )
+                    / (len(data) - 1),
+                    label=solver,
+                )
+            plt.legend()
+            plt.show()
