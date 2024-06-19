@@ -28,6 +28,24 @@ class KDL(AbstractIK):
         )
 
 
+class RelaxedIK(AbstractIK):
+    name = "RelaxedIK"
+
+    def set_config(self, planning_group):
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.kinematics_solver",
+            "relaxed_ik/RelaxedIkPlugin",
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.kinematics_solver_search_resolution",
+            0.001,
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
+            1.0,
+        )
+
+
 class TracIK(AbstractIK):
     name = "TracIK"
 
@@ -84,23 +102,41 @@ class PickIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
-            1.0,
+            0.5,
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", "global"
         )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_population_size", 93
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_elite_size", 65
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_wipeout_fitness_tol", 0.02856
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_max_generations", 56
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_gd_max_iters", 66
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.memetic_gd_max_time", 0.004159
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.gd_step_size", 2.3659e-6
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.gd_min_cost_delta", 1.0e-12
+        # )
+        # reach_ros.set_parameter(
+        #    f"robot_description_kinematics.{planning_group}.cost_threshold", 10000.0
+        # )
         reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.memetic_gd_max_iters", 5
-        )
-        reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.memetic_population_size", 40
-        )
-        reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.stop_optimization_on_valid_solution",
+            f"robot_description_kinematics.{planning_group}.stop_optimization_on_first_solution",
             True,
-        )
-        reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.cost_threshold", 10000.0
         )
 
 
@@ -126,4 +162,50 @@ class BioIK(AbstractIK):
         )
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", "bio2_memetic"
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.population_size", 4
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.child_count", 100
+        )
+
+
+class BioIK2MemeticL(BioIK):
+    name = "BioIK2Memetic_l"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.mode", "bio2_memetic_l"
+        )
+
+
+class BioIK2(BioIK):
+    name = "BioIK2"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.mode", "bio2"
+        )
+
+
+class BioIK2MemeticLBFGS(BioIK):
+    name = "BioIK2MemeticLBFGS"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.mode", "bio2_memetic_lbfgs"
+        )
+
+
+class BioIK1(BioIK):
+    name = "BioIK1"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.mode", "bio1"
         )
