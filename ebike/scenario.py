@@ -75,4 +75,4 @@ class Random(AbstractScenario):
 
     @property
     def pcd_file(self):
-        return "package://ebike/scenarios/random_100.pcd"
+        return "package://ebike/scenarios/random_1000.pcd"

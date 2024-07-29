@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
     rdf_loader::RDFLoader loader(urdf, srdf);
     auto model = std::make_shared<moveit::core::RobotModel>(loader.getURDF(), loader.getSRDF());
     moveit::core::RobotState rs(model);
-    int num_samples = 100;
-    std::array<Eigen::Isometry3d, 100> samples;
+    const int num_samples = 1000;
+    std::array<Eigen::Isometry3d, num_samples> samples;
     for (auto &pose : samples) {
         rs.setToRandomPositions();
         rs.updateLinkTransforms();
