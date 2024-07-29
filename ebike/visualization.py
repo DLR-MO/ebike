@@ -121,6 +121,13 @@ def plot_from_db():
                         )
             plt.xlabel("Time (ms)")
             plt.ylabel("Fraction solved")
+            # hide duplicate legend entries
+            ax = plt.gca()
+            entries = set()
+            for p in ax.get_lines():
+                if p.get_label() in entries:
+                    p.set_label("_" + p.get_label())
+                entries.add(p.get_label())
             plt.legend()
             plt.savefig(f"results/{scenario}_{robot}.png", dpi=300, bbox_inches="tight")
             plt.xlim(0, 50)
