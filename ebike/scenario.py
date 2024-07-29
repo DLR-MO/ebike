@@ -36,6 +36,9 @@ class AbstractScenario:
             },
             "logger": {"name": "BoostProgressConsoleLogger"},
         }
+        if self.ply_file is None:
+            del reach_config["ik_solver"]["collision_mesh_filename"]
+            del reach_config["display"]["collision_mesh_filename"]
         return reach_config
 
     @property
@@ -61,3 +64,15 @@ class Kallax(AbstractScenario):
 
 class Barrel(AbstractScenario):
     name = "barrel"
+
+
+class Random(AbstractScenario):
+    name = "random"
+
+    @property
+    def ply_file(self):
+        return None
+
+    @property
+    def pcd_file(self):
+        return "package://ebike/scenarios/random_100.pcd"

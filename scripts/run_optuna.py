@@ -105,7 +105,7 @@ class BenchmarkOptimization:
         sampler = optuna.samplers.TPESampler()
         storage = "sqlite:///optuna.db"
 
-        study_name = "pick_ik_optuna"
+        study_name = "ur10_small_table_motpe"
         if study_name in optuna.get_all_study_names(storage):
             self.study = optuna.load_study(study_name=study_name, storage=storage)
         else:
@@ -113,7 +113,7 @@ class BenchmarkOptimization:
                 study_name=study_name,
                 sampler=sampler,
                 storage=storage,
-                direction="maximize",
+                directions=["maximize", "minimize"],
             )
             self.study.enqueue_trial(
                 {
@@ -139,8 +139,10 @@ class BenchmarkOptimization:
         )
         num_reached = np.sum(result.reached == 1)
         avg_ik_time = np.mean(result.ik_time[result.reached == 1])
-        trial.set_user_attr("avg_ik_time", avg_ik_time)
-        return num_reached / len(result)
+        max_ik_time = np.max(result.ik_time[result.reached == 1])
+        # trial.set_user_attr("avg_ik_time", avg_ik_time)
+        trial.set_user_attr("max_ik_time", max_ik_time)
+        return num_reached / len(result), avg_ik_time
 
 
 if __name__ == "__main__":

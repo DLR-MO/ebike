@@ -4,10 +4,12 @@ import os
 import sys
 import tempfile
 from collections import defaultdict
+from datetime import datetime
 
 import reach
 import reach_ros
 
+from ebike.utils import save_result
 from ebike.visualization import plot_results, print_results
 
 
@@ -19,6 +21,7 @@ class Benchmark:
         self.scenarios = []
         self.results = defaultdict(lambda: defaultdict(dict))
         self.interactive = interactive
+        self.start_time = datetime.now()
 
     def add_ik(self, ik):
         self.iks.append(ik)
@@ -47,6 +50,9 @@ class Benchmark:
                     )
                     db = reach.load(f"{results_dir}/{config_name}/reach.db.xml")
                     self.results[robot.name][scenario.name][ik.name] = db.results
+                    save_result(
+                        robot.name, scenario.name, ik.name, self.start_time, db.results
+                    )
         print(f"Results saved in {results_dir}")
         return self.results
 
