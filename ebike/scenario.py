@@ -4,6 +4,7 @@
 class AbstractScenario:
     name = None
     hole_position = []
+    hole_axis = []
 
     def get_config(self, planning_group):
         reach_config = {
@@ -20,6 +21,7 @@ class AbstractScenario:
                 "collision_mesh_filename": self.ply_file,
                 "touch_links": ["end_effector", "endo_third_link"],
                 "hole_position": self.hole_position,
+                "hole_axis": self.hole_axis,
             },
             "evaluator": {
                 "name": "NoOpEvaluator",
