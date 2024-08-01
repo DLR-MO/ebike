@@ -53,7 +53,7 @@ class RelaxedIK(AbstractIK):
 
 
 class RelaxedIKRCM(RelaxedIK):
-    name = "RelaxedIKRCM"
+    name = "RelaxedIK (RCMGoal)"
 
     def set_config(self, planning_group):
         super().set_config(planning_group)
@@ -61,13 +61,15 @@ class RelaxedIKRCM(RelaxedIK):
 
 
 class RelaxedIKLine(RelaxedIK):
+    name = "RelaxedIK (LineGoal)"
+
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_line_goal", True)
 
 
 class RelaxedIKDepth(RelaxedIK):
-    name = "RelaxedIKDepth"
+    name = "RelaxedIK (DepthGoal)"
 
     def set_config(self, planning_group):
         super().set_config(planning_group)
@@ -75,7 +77,7 @@ class RelaxedIKDepth(RelaxedIK):
 
 
 class RelaxedIKCollisionDistance(RelaxedIK):
-    name = "RelaxedIKCollisionDistance"
+    name = "RelaxedIK (CollisionDistanceGoal)"
 
     def set_config(self, planning_group):
         super().set_config(planning_group)
