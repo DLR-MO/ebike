@@ -1,5 +1,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_scene/planning_scene.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 
@@ -33,9 +34,12 @@ int main(int argc, char **argv) {
     moveit::core::RobotState rs(model);
     const int num_samples = 1000;
     std::array<Eigen::Isometry3d, num_samples> samples;
+    planning_scene::PlanningScene scene(model);
     for (auto &pose : samples) {
-        rs.setToRandomPositions();
-        rs.updateLinkTransforms();
+        do {
+            rs.setToRandomPositions();
+            rs.update();
+        } while (scene.isStateColliding(rs));
         pose = rs.getGlobalLinkTransform("end_effector");
     }
     // write to PCD
