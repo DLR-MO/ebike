@@ -27,6 +27,11 @@ def print_results(results):
                     f"{solver}: {solve_times.mean():.2f} ms ± {solve_times.std():.2f} ms"
                 )
 
+            print(f"Solution callback count ({robot} on {scenario}):")
+            for solver, data in results_df.items():
+                counts = data.solution_callback_count[data.reached == 1] * 1000
+                print(f"{solver}: {counts.mean():.2f} ± {counts.std():.2f}")
+
 
 def plot_results(results):
     for robot, robot_data in results.items():
@@ -96,6 +101,7 @@ def plot_from_db():
                 (scenario, robot),
             )
             solvers = cur.fetchall()
+
             plt.title(f"Cumulative solve rates, {robot} on {scenario}")
             plt.ylim(0, 1)
             for i, (solver,) in enumerate(solvers):
@@ -119,7 +125,7 @@ def plot_from_db():
                             linestyle="solid",
                             color=plt.cm.tab20(i),
                         )
-            plt.xlabel("Time (ms)")
+            plt.xlabel("Duration (ms)")
             plt.ylabel("Fraction solved")
             # hide duplicate legend entries
             ax = plt.gca()
@@ -133,5 +139,46 @@ def plot_from_db():
             plt.xlim(0, 50)
             plt.savefig(
                 f"results/{scenario}_{robot}_detail.png", dpi=300, bbox_inches="tight"
+            )
+            plt.close()
+
+            # solution callback count
+            plt.title(f"Solver iterations, {robot} on {scenario}")
+            plt.ylim(0, 1)
+            for i, (solver,) in enumerate(solvers):
+                cur.execute(
+                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ?",
+                    (scenario, robot, solver),
+                )
+                experiment_ids = cur.fetchall()
+                for (experiment_id,) in experiment_ids:
+                    cur.execute(
+                        "SELECT reached, solution_callback_count FROM results WHERE experiment_id = ?",
+                        (experiment_id,),
+                    )
+                    results = cur.fetchall()
+                    reached, count = np.array(results).T
+                    if np.sum(reached == 1) > 0:
+                        plt.plot(
+                            np.sort(count[reached == 1]),
+                            np.arange(np.sum(reached == 1)) / (len(reached) - 1),
+                            label=solver,
+                            linestyle="solid",
+                            color=plt.cm.tab20(i),
+                        )
+            plt.xlabel("Iterations")
+            plt.ylabel("Fraction solved")
+            # hide duplicate legend entries
+            ax = plt.gca()
+            entries = set()
+            for p in ax.get_lines():
+                if p.get_label() in entries:
+                    p.set_label("_" + p.get_label())
+                entries.add(p.get_label())
+            plt.legend()
+            plt.savefig(
+                f"results/{scenario}_{robot}_iterations.png",
+                dpi=300,
+                bbox_inches="tight",
             )
             plt.close()
