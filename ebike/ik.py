@@ -50,6 +50,7 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", False)
 
 
 class RelaxedIKRCM(RelaxedIK):
@@ -66,6 +67,14 @@ class RelaxedIKLine(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_line_goal", True)
+
+
+class RelaxedIKLineAlignment(RelaxedIK):
+    name = "RelaxedIK (LineGoal with AlignmentGoal)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", True)
 
 
 class RelaxedIKDepth(RelaxedIK):
@@ -212,6 +221,7 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", False)
 
 
 class BioIKRCM(BioIK):
@@ -228,6 +238,14 @@ class BioIKLine(BioIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_line_goal", True)
+
+
+class BioIKLineAlignment(BioIK):
+    name = "BioIK (LineGoal with AlignmentGoal)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", True)
 
 
 class BioIKDepth(BioIK):
