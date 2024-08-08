@@ -51,6 +51,15 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
+        reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
+
+
+class RelaxedIKEmptyCostFn(RelaxedIK):
+    name = "RelaxedIK (Empty CostFn)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.empty_cost_fn", True)
 
 
 class RelaxedIKRCM(RelaxedIK):
@@ -222,6 +231,15 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
+        reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
+
+
+class BioIKEmptyCostFn(BioIK):
+    name = "BioIK (Empty CostFn)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.empty_cost_fn", True)
 
 
 class BioIKRCM(BioIK):
