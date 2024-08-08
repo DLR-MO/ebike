@@ -88,6 +88,156 @@ def plot_results(results):
         plt.show()
 
 
+def generate_plot(solvers, scenarios, robot, output_prefix):
+    with sqlite3.connect("results.db") as conn:
+        cur = conn.cursor()
+        time_plot = plt.figure()
+        time_ax = time_plot.subplots()
+        if len(scenarios) == 1:
+            title_suffix = f", {robot} on {scenarios[0]}"
+        elif len(solvers) == 1:
+            title_suffix = f", {robot} using {solvers[0]}"
+        else:
+            title_suffix = f" on {robot}"
+        time_ax.set_title("Cumulative solve rates" + title_suffix)
+        time_ax.set_ylim(0, 1)
+        it_plot = plt.figure()
+        it_ax = it_plot.subplots()
+        it_ax.set_title("Solver iterations" + title_suffix)
+        it_ax.set_ylim(0, 1)
+        count_max = 0
+        for scenario in scenarios:
+            for solver in solvers:
+                cur.execute(
+                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
+                    (scenario, robot, solver),
+                )
+                fetch_result = cur.fetchone()
+                if fetch_result is None:
+                    print(f"Skipping {solver} on {scenario} because it does not exist")
+                    continue
+
+                experiment_id = fetch_result[0]
+
+                cur.execute(
+                    "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
+                    (experiment_id,),
+                )
+                results = cur.fetchall()
+                reached, ik_time, count = np.array(results).T
+                if np.sum(reached == 1) > 0:
+                    if len(scenarios) > 1 and len(solvers) > 1:
+                        label = f"{solver} on {scenario}"
+                    elif len(scenarios) > 1:
+                        label = scenario
+                    else:
+                        label = solver
+                    time_ax.plot(
+                        np.sort(ik_time[reached == 1] * 1000),
+                        np.arange(np.sum(reached == 1)) / (len(reached) - 1),
+                        label=label,
+                    )
+                    it_ax.plot(
+                        np.sort(count[reached == 1]),
+                        np.arange(np.sum(reached == 1)) / (len(reached) - 1),
+                        label=label,
+                    )
+                    if np.sum(count[reached == 1]) > 0:
+                        count_max = max(count_max, np.max(count[reached == 1]))
+        time_ax.set_xlabel("Duration (ms)")
+        time_ax.set_ylabel("Fraction solved")
+        time_ax.legend()
+        time_ax.set_xlim(0, 1000)
+        time_plot.savefig(f"{output_prefix}.png", dpi=300, bbox_inches="tight")
+        time_ax.set_xlim(0, 50)
+        time_plot.savefig(f"{output_prefix}_detail.png", dpi=300, bbox_inches="tight")
+        time_ax.set_xlim(0, 5)
+        time_plot.savefig(f"{output_prefix}_detail2.png", dpi=300, bbox_inches="tight")
+
+        it_ax.set_xlabel("Iterations")
+        it_ax.set_ylabel("Fraction solved")
+        it_ax.legend()
+        it_ax.set_xlim(0, count_max)
+        it_plot.savefig(
+            f"{output_prefix}_iterations.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        it_ax.set_xlim(0, 10)
+        it_plot.savefig(
+            f"{output_prefix}_iterations_detail.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+
+
+def generate_table(solvers, scenarios, robot, output_prefix):
+    with sqlite3.connect("results.db") as conn:
+        cur = conn.cursor()
+        time_table = ""
+        count_table = ""
+        durations = {0.005: [], 0.01: [], 0.1: [], 1: []}
+        iterations = {1: [], 2: [], 3: [], 5: [], 10: [], 100: []}
+        time_table += (
+            'table.header("Duration", '
+            + ", ".join([f'"{int(x*1000)}ms"' for x in durations])
+            + ', "Mean"),\n'
+        )
+        count_table += (
+            'table.header("Iterations", '
+            + ", ".join([f'"{x}"' for x in iterations])
+            + ', "Mean"),\n'
+        )
+        for scenario in scenarios:
+            for solver in solvers:
+                for arr in durations.values():
+                    arr.clear()
+                for arr in iterations.values():
+                    arr.clear()
+                cur.execute(
+                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
+                    (scenario, robot, solver),
+                )
+                fetch_result = cur.fetchone()
+                if fetch_result is None:
+                    print(f"Skipping {solver} on {scenario} because it does not exist")
+                    continue
+
+                experiment_id = fetch_result[0]
+
+                cur.execute(
+                    "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
+                    (experiment_id,),
+                )
+                results = cur.fetchall()
+                reached, ik_time, count = np.array(results).T
+                if len(scenarios) > 1 and len(solvers) > 1:
+                    label = f"{solver} on {scenario}"
+                elif len(scenarios) > 1:
+                    label = scenario
+                else:
+                    label = solver
+
+                for dur, arr in durations.items():
+                    arr.append(np.sum(ik_time[reached == 1] <= dur) / len(reached))
+                dur_mean = np.mean(ik_time[reached == 1])
+                for nit, arr in iterations.items():
+                    arr.append(np.sum(count[reached == 1] <= nit) / len(reached))
+                it_mean = np.mean(count[reached == 1])
+                time_table += f'"{label}", '
+                for arr in durations.values():
+                    time_table += f'"{np.mean(arr)*100:.1f}%", '
+                time_table += f'"{dur_mean*1000:.3f}ms",\n'
+                count_table += f'"{label}", '
+                for arr in iterations.values():
+                    count_table += f'"{np.mean(arr)*100:.1f}%", '
+                count_table += f'"{it_mean:.3f} its",\n'
+        with open(output_prefix + ".txt", "w") as text_file:
+            text_file.write(time_table)
+            text_file.write("\n\n")
+            text_file.write(count_table)
+
+
 def plot_from_db(solvers_=[]):
     if not os.path.exists("results"):
         os.mkdir("results")
@@ -102,13 +252,15 @@ def plot_from_db(solvers_=[]):
             )
             solvers = cur.fetchall()
 
-            #filter bio ik
+            # filter bio ik
             def is_bio_ik(s):
-                if not s.startswith("BioIK") and not s.startswith("Bio_ik"): return False
-                if s.startswith("BioIK "): return False
+                if not s.startswith("BioIK") and not s.startswith("Bio_ik"):
+                    return False
+                if s.startswith("BioIK "):
+                    return False
                 return True
 
-            #solvers = [s for s in solvers if is_bio_ik(s[0])]
+            # solvers = [s for s in solvers if is_bio_ik(s[0])]
             if solvers_:
                 solvers = [s for s in solvers if s[0] in solvers_]
 
@@ -142,13 +294,23 @@ def plot_from_db(solvers_=[]):
                             linestyle="solid",
                             color=plt.cm.tab10(i),
                         )
-                    solve_rates_5ms.append(np.sum(ik_time[reached == 1] <= 0.005) / len(ik_time))
-                    solve_rates_10ms.append(np.sum(ik_time[reached == 1] <= 0.01) / len(ik_time))
-                    solve_rates_100ms.append(np.sum(ik_time[reached == 1] <= 0.1) / len(ik_time))
-                    solve_rates_1000ms.append(np.sum(ik_time[reached == 1] <= 1.0) / len(ik_time))
+                    solve_rates_5ms.append(
+                        np.sum(ik_time[reached == 1] <= 0.005) / len(ik_time)
+                    )
+                    solve_rates_10ms.append(
+                        np.sum(ik_time[reached == 1] <= 0.01) / len(ik_time)
+                    )
+                    solve_rates_100ms.append(
+                        np.sum(ik_time[reached == 1] <= 0.1) / len(ik_time)
+                    )
+                    solve_rates_1000ms.append(
+                        np.sum(ik_time[reached == 1] <= 1.0) / len(ik_time)
+                    )
                     time_means.append(np.mean(ik_time))
-                print(f'"{solver} ({len(experiment_ids)})", ', end='')
-                print(f'"{np.mean(solve_rates_5ms):.3f}", "{np.mean(solve_rates_10ms):.3f}", "{np.mean(solve_rates_100ms):.3f}", "{np.mean(solve_rates_1000ms):.3f}", "{np.mean(time_means) * 1000:.3f} ms",')
+                print(f'"{solver} ({len(experiment_ids)})", ', end="")
+                print(
+                    f'"{np.mean(solve_rates_5ms):.3f}", "{np.mean(solve_rates_10ms):.3f}", "{np.mean(solve_rates_100ms):.3f}", "{np.mean(solve_rates_1000ms):.3f}", "{np.mean(time_means) * 1000:.3f} ms",'
+                )
             plt.xlabel("Duration (ms)")
             plt.ylabel("Fraction solved")
             # hide duplicate legend entries
@@ -204,9 +366,9 @@ def plot_from_db(solvers_=[]):
                     for nit, arr in iterations.items():
                         arr.append(np.sum(count[reached == 1] <= nit) / len(count))
                     count_means.append(np.mean(count[reached == 1]))
-                print(f'"{solver} ({len(experiment_ids)})", ', end='')
+                print(f'"{solver} ({len(experiment_ids)})", ', end="")
                 for nit, arr in iterations.items():
-                    print(f'"{np.mean(arr):.3f}", ', end='')
+                    print(f'"{np.mean(arr):.3f}", ', end="")
                 print(f'"{np.mean(count_means):.3f} its",')
             plt.xlabel("Iterations")
             plt.ylabel("Fraction solved")
