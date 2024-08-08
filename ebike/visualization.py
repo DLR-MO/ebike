@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 import os.path
 import sqlite3
+from itertools import zip_longest
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -88,7 +89,7 @@ def plot_results(results):
         plt.show()
 
 
-def generate_plot(solvers, scenarios, robot, output_prefix):
+def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
     with sqlite3.connect("results.db") as conn:
         cur = conn.cursor()
         time_plot = plt.figure()
@@ -107,7 +108,7 @@ def generate_plot(solvers, scenarios, robot, output_prefix):
         it_ax.set_ylim(0, 1)
         count_max = 0
         for scenario in scenarios:
-            for solver in solvers:
+            for solver, solver_label in zip_longest(solvers, solver_labels):
                 cur.execute(
                     "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
                     (scenario, robot, solver),
@@ -127,11 +128,11 @@ def generate_plot(solvers, scenarios, robot, output_prefix):
                 reached, ik_time, count = np.array(results).T
                 if np.sum(reached == 1) > 0:
                     if len(scenarios) > 1 and len(solvers) > 1:
-                        label = f"{solver} on {scenario}"
+                        label = f"{solver_label or solver} on {scenario}"
                     elif len(scenarios) > 1:
                         label = scenario
                     else:
-                        label = solver
+                        label = solver_label or solver
                     time_ax.plot(
                         np.sort(ik_time[reached == 1] * 1000),
                         np.arange(np.sum(reached == 1)) / (len(reached) - 1),
@@ -171,7 +172,7 @@ def generate_plot(solvers, scenarios, robot, output_prefix):
         )
 
 
-def generate_table(solvers, scenarios, robot, output_prefix):
+def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
     with sqlite3.connect("results.db") as conn:
         cur = conn.cursor()
         time_table = ""
@@ -189,7 +190,7 @@ def generate_table(solvers, scenarios, robot, output_prefix):
             + ', "Mean"),\n'
         )
         for scenario in scenarios:
-            for solver in solvers:
+            for solver, solver_label in zip_longest(solvers, solver_labels):
                 for arr in durations.values():
                     arr.clear()
                 for arr in iterations.values():
@@ -212,11 +213,11 @@ def generate_table(solvers, scenarios, robot, output_prefix):
                 results = cur.fetchall()
                 reached, ik_time, count = np.array(results).T
                 if len(scenarios) > 1 and len(solvers) > 1:
-                    label = f"{solver} on {scenario}"
+                    label = f"{solver_label or solver} on {scenario}"
                 elif len(scenarios) > 1:
                     label = scenario
                 else:
-                    label = solver
+                    label = solver_label or solver
 
                 for dur, arr in durations.items():
                     arr.append(np.sum(ik_time[reached == 1] <= dur) / len(reached))
