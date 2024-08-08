@@ -29,7 +29,7 @@ def print_results(results):
 
             print(f"Solution callback count ({robot} on {scenario}):")
             for solver, data in results_df.items():
-                counts = data.solution_callback_count[data.reached == 1] * 1000
+                counts = data.solution_callback_count[data.reached == 1]
                 print(f"{solver}: {counts.mean():.2f} ± {counts.std():.2f}")
 
 
@@ -88,7 +88,7 @@ def plot_results(results):
         plt.show()
 
 
-def plot_from_db():
+def plot_from_db(solvers_=[]):
     if not os.path.exists("results"):
         os.mkdir("results")
     with sqlite3.connect("results.db") as conn:
@@ -102,6 +102,18 @@ def plot_from_db():
             )
             solvers = cur.fetchall()
 
+            #filter bio ik
+            def is_bio_ik(s):
+                if not s.startswith("BioIK") and not s.startswith("Bio_ik"): return False
+                if s.startswith("BioIK "): return False
+                return True
+
+            #solvers = [s for s in solvers if is_bio_ik(s[0])]
+            if solvers_:
+                solvers = [s for s in solvers if s[0] in solvers_]
+
+            print(scenario)
+            print('table.header("Duration", "5ms", "10ms", "100ms", "1000ms", "Mean"),')
             plt.title(f"Cumulative solve rates, {robot} on {scenario}")
             plt.ylim(0, 1)
             for i, (solver,) in enumerate(solvers):
@@ -110,6 +122,11 @@ def plot_from_db():
                     (scenario, robot, solver),
                 )
                 experiment_ids = cur.fetchall()
+                solve_rates_5ms = []
+                solve_rates_10ms = []
+                solve_rates_100ms = []
+                solve_rates_1000ms = []
+                time_means = []
                 for (experiment_id,) in experiment_ids:
                     cur.execute(
                         "SELECT reached, ik_time FROM results WHERE experiment_id = ?",
@@ -121,10 +138,17 @@ def plot_from_db():
                         plt.plot(
                             np.sort(ik_time[reached == 1] * 1000),
                             np.arange(np.sum(reached == 1)) / (len(reached) - 1),
-                            label=solver,
+                            label=solver.split()[0],
                             linestyle="solid",
-                            color=plt.cm.tab20(i),
+                            color=plt.cm.tab10(i),
                         )
+                    solve_rates_5ms.append(np.sum(ik_time[reached == 1] <= 0.005) / len(ik_time))
+                    solve_rates_10ms.append(np.sum(ik_time[reached == 1] <= 0.01) / len(ik_time))
+                    solve_rates_100ms.append(np.sum(ik_time[reached == 1] <= 0.1) / len(ik_time))
+                    solve_rates_1000ms.append(np.sum(ik_time[reached == 1] <= 1.0) / len(ik_time))
+                    time_means.append(np.mean(ik_time))
+                print(f'"{solver} ({len(experiment_ids)})", ', end='')
+                print(f'"{np.mean(solve_rates_5ms):.3f}", "{np.mean(solve_rates_10ms):.3f}", "{np.mean(solve_rates_100ms):.3f}", "{np.mean(solve_rates_1000ms):.3f}", "{np.mean(time_means) * 1000:.3f} ms",')
             plt.xlabel("Duration (ms)")
             plt.ylabel("Fraction solved")
             # hide duplicate legend entries
@@ -135,22 +159,31 @@ def plot_from_db():
                     p.set_label("_" + p.get_label())
                 entries.add(p.get_label())
             plt.legend()
+            plt.xlim(0, 1000)
             plt.savefig(f"results/{scenario}_{robot}.png", dpi=300, bbox_inches="tight")
             plt.xlim(0, 50)
             plt.savefig(
                 f"results/{scenario}_{robot}_detail.png", dpi=300, bbox_inches="tight"
+            )
+            plt.xlim(0, 5)
+            plt.savefig(
+                f"results/{scenario}_{robot}_detail2.png", dpi=300, bbox_inches="tight"
             )
             plt.close()
 
             # solution callback count
             plt.title(f"Solver iterations, {robot} on {scenario}")
             plt.ylim(0, 1)
+            print('table.header("Solver", "1", "2", "3", "5", "10", "100", "Mean"),')
+            count_max = 0
             for i, (solver,) in enumerate(solvers):
                 cur.execute(
                     "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ?",
                     (scenario, robot, solver),
                 )
                 experiment_ids = cur.fetchall()
+                iterations = {1: [], 2: [], 3: [], 5: [], 10: [], 100: []}
+                count_means = []
                 for (experiment_id,) in experiment_ids:
                     cur.execute(
                         "SELECT reached, solution_callback_count FROM results WHERE experiment_id = ?",
@@ -164,8 +197,17 @@ def plot_from_db():
                             np.arange(np.sum(reached == 1)) / (len(reached) - 1),
                             label=solver,
                             linestyle="solid",
-                            color=plt.cm.tab20(i),
+                            color=plt.cm.tab10(i),
                         )
+                    if np.sum(count[reached == 1]) > 0:
+                        count_max = max(count_max, np.max(count[reached == 1]))
+                    for nit, arr in iterations.items():
+                        arr.append(np.sum(count[reached == 1] <= nit) / len(count))
+                    count_means.append(np.mean(count[reached == 1]))
+                print(f'"{solver} ({len(experiment_ids)})", ', end='')
+                for nit, arr in iterations.items():
+                    print(f'"{np.mean(arr):.3f}", ', end='')
+                print(f'"{np.mean(count_means):.3f} its",')
             plt.xlabel("Iterations")
             plt.ylabel("Fraction solved")
             # hide duplicate legend entries
@@ -176,8 +218,15 @@ def plot_from_db():
                     p.set_label("_" + p.get_label())
                 entries.add(p.get_label())
             plt.legend()
+            plt.xlim(0, count_max)
             plt.savefig(
                 f"results/{scenario}_{robot}_iterations.png",
+                dpi=300,
+                bbox_inches="tight",
+            )
+            plt.xlim(0, 10)
+            plt.savefig(
+                f"results/{scenario}_{robot}_iterations_detail.png",
                 dpi=300,
                 bbox_inches="tight",
             )
