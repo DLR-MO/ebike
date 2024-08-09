@@ -223,10 +223,14 @@ def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
 
                 for dur, arr in durations.items():
                     arr.append(np.sum(ik_time[reached == 1] <= dur) / len(reached))
-                dur_mean = np.mean(ik_time[reached == 1])
+                if np.sum([reached == 1]) > 0:
+                    dur_mean = np.mean(ik_time[reached == 1])
+                    it_mean = np.mean(count[reached == 1])
+                else:
+                    dur_mean = 0
+                    it_mean = 0
                 for nit, arr in iterations.items():
                     arr.append(np.sum(count[reached == 1] <= nit) / len(reached))
-                it_mean = np.mean(count[reached == 1])
                 time_table += f'"{label}", '
                 for arr in durations.values():
                     time_table += f'"{np.mean(arr)*100:.1f}%", '
@@ -236,9 +240,19 @@ def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
                     count_table += f'"{np.mean(arr)*100:.1f}%", '
                 count_table += f'"{it_mean:.3f} its",\n'
         with open(output_prefix + ".txt", "w") as text_file:
+            text_file.write(
+                '#figure(\nplacement: auto,\ncaption: "",\ngrid(inset: 5pt,\n'
+            )
+            text_file.write(
+                "table(columns: (auto," + " 1fr," * (len(durations) + 1) + "),\n"
+            )
             text_file.write(time_table)
-            text_file.write("\n\n")
+            text_file.write("),\n")
+            text_file.write(
+                "table(columns: (auto," + " 1fr," * (len(iterations) + 1) + "),\n"
+            )
             text_file.write(count_table)
+            text_file.write(")))")
 
 
 def plot_from_db(solvers_=[]):
