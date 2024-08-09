@@ -154,6 +154,7 @@ def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
         time_plot.savefig(f"{output_prefix}_detail.png", dpi=300, bbox_inches="tight")
         time_ax.set_xlim(0, 5)
         time_plot.savefig(f"{output_prefix}_detail2.png", dpi=300, bbox_inches="tight")
+        plt.close(time_plot)
 
         it_ax.set_xlabel("Iterations")
         it_ax.set_ylabel("Fraction solved")
@@ -170,6 +171,7 @@ def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
             dpi=300,
             bbox_inches="tight",
         )
+        plt.close(it_plot)
 
 
 def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
