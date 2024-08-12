@@ -60,8 +60,12 @@ class SmallTable(AbstractScenario):
     name = "small_table"
 
 
-class Kallax(AbstractScenario):
-    name = "kallax"
+class TableObjects(AbstractScenario):
+    name = "table_objects"
+
+
+class Shelf(AbstractScenario):
+    name = "shelf"
 
 
 class Barrel(AbstractScenario):
