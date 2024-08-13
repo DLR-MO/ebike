@@ -220,12 +220,6 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", self.mode
         )
-        reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.population_size2", 2
-        )
-        reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.child_count", 16
-        )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
