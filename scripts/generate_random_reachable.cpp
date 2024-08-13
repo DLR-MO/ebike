@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
                << pose.translation().y() << " "
                << pose.translation().z() << " ";
         // normal
-        Eigen::Vector3d normal = pose.rotation() * Eigen::Vector3d::UnitZ();
+        Eigen::Vector3d normal = pose.rotation() * -Eigen::Vector3d::UnitZ();
         output << normal.x() << " "
                << normal.y() << " "
                << normal.z() << " "
