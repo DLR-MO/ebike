@@ -108,52 +108,109 @@ def generate_plot(
         it_ax = it_plot.subplots()
         it_ax.set_title("Solver iterations" + title_suffix)
         it_ax.set_ylim(0, 1)
-        count_max = 0
+        total_count_max = 0
         for scenario in scenarios:
             for i, (solver, solver_label, solver_color) in enumerate(
                 zip_longest(solvers, solver_labels, solver_colors)
             ):
+                n_avg = 3
                 cur.execute(
-                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
-                    (scenario, robot, solver),
+                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT ?",
+                    (scenario, robot, solver, n_avg),
                 )
-                fetch_result = cur.fetchone()
-                if fetch_result is None:
+                fetch_result = cur.fetchall()
+                use_avg = True
+                if len(fetch_result) == 0:
                     print(f"Skipping {solver} on {scenario} because it does not exist")
                     continue
+                elif len(fetch_result) < 3:
+                    print(
+                        f"Warning: {solver} on {scenario} only has {len(fetch_result)} runs!"
+                    )
+                    use_avg = False
 
-                experiment_id = fetch_result[0]
-
+                experiment_ids = [r[0] for r in fetch_result]
                 cur.execute(
-                    "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
-                    (experiment_id,),
+                    "SELECT MAX(ik_time), MAX(solution_callback_count) FROM results WHERE experiment_id IN ({})".format(
+                        ",".join("?" * len(experiment_ids))
+                    ),
+                    experiment_ids,
                 )
-                results = cur.fetchall()
-                reached, ik_time, count = np.array(results).T
-                if np.sum(reached == 1) > 0:
-                    if len(scenarios) > 1 and len(solvers) > 1:
-                        label = f"{solver_label or solver} on {scenario}"
-                    elif len(scenarios) > 1:
-                        label = scenario
+                max_time, max_count = cur.fetchone()
+
+                cdfs = []
+                count_cdfs = []
+                xs = np.arange(0, int(max_time * 100000)) / 100
+                for experiment_id in experiment_ids:
+                    cur.execute(
+                        "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
+                        (experiment_id,),
+                    )
+                    results = cur.fetchall()
+                    reached, ik_time, count = np.array(results).T
+                    times = np.sort(ik_time[reached == 1] * 1000)
+                    times = (
+                        np.histogram(
+                            times, bins=np.arange(0, int(max_time * 100000) + 1) / 100
+                        )[0].cumsum()
+                        / 1000
+                    )
+                    if len(times) == 0:
+                        times = np.zeros_like(xs)
                     else:
-                        label = solver_label or solver
-                    color = (
-                        plt.cm.tab20(solver_color) if solver_color else plt.cm.tab10(i)
+                        times = np.pad(
+                            times, (0, int(max_time * 100000) - len(times)), "edge"
+                        )
+                    cdfs.append(times)
+
+                    iterations = np.sort(count[reached == 1])
+                    if len(iterations) == 0:
+                        counts = np.zeros(max_count)
+                    else:
+                        counts, _ = np.histogram(
+                            count[reached == 1],
+                            bins=np.arange(iterations.min(), iterations.max() + 2),
+                        )
+                        counts = np.pad(counts, (0, max_count - len(counts)), "edge")
+                    count_cdfs.append(np.concatenate([[0], np.cumsum(counts) / 1000]))
+
+                if len(scenarios) > 1 and len(solvers) > 1:
+                    label = f"{solver_label or solver} on {scenario}"
+                elif len(scenarios) > 1:
+                    label = scenario
+                else:
+                    label = solver_label or solver
+
+                color = plt.cm.tab20(solver_color) if solver_color else plt.cm.tab10(i)
+                cdfs = np.vstack(cdfs)
+                mean_cdf = np.mean(cdfs, axis=0)
+                min_cdf = np.min(cdfs, axis=0)
+                max_cdf = np.max(cdfs, axis=0)
+                time_ax.plot(
+                    xs,
+                    mean_cdf,
+                    label=label,
+                    color=color,
+                )
+                if use_avg:
+                    time_ax.fill_between(xs, min_cdf, max_cdf, alpha=0.2)
+
+                count_cdfs = np.vstack(count_cdfs)
+                count_mean = np.mean(count_cdfs, axis=0)
+                count_min = np.min(count_cdfs, axis=0)
+                count_max = np.max(count_cdfs, axis=0)
+                it_ax.plot(
+                    np.arange(0, max_count + 1),
+                    count_mean,
+                    label=label,
+                    color=color,
+                )
+                if use_avg:
+                    it_ax.fill_between(
+                        np.arange(0, max_count + 1), count_min, count_max, alpha=0.2
                     )
-                    time_ax.plot(
-                        np.sort(ik_time[reached == 1] * 1000),
-                        np.arange(np.sum(reached == 1)) / (len(reached) - 1),
-                        label=label,
-                        color=color,
-                    )
-                    it_ax.plot(
-                        np.sort(count[reached == 1]),
-                        np.arange(np.sum(reached == 1)) / (len(reached) - 1),
-                        label=label,
-                        color=color,
-                    )
-                    if np.sum(count[reached == 1]) > 0:
-                        count_max = max(count_max, np.max(count[reached == 1]))
+
+                total_count_max = max(total_count_max, max_count)
         time_ax.set_xlabel("Duration (ms)")
         time_ax.set_ylabel("Fraction solved")
         time_ax.legend()
@@ -168,7 +225,7 @@ def generate_plot(
         it_ax.set_xlabel("Iterations")
         it_ax.set_ylabel("Fraction solved")
         it_ax.legend()
-        it_ax.set_xlim(0, count_max)
+        it_ax.set_xlim(0, total_count_max)
         it_plot.savefig(
             f"{output_prefix}_iterations.png",
             dpi=300,

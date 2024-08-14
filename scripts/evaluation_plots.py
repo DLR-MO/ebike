@@ -9,6 +9,8 @@ if __name__ == "__main__":
     for folder in os.listdir(RESULTS_DIR):
         if not os.path.isdir(os.path.join(RESULTS_DIR, folder)):
             continue
+        if folder.startswith("_"):
+            continue
         config_file = os.path.join(RESULTS_DIR, folder, "config.txt")
         plots = []
         solver_labels = []
