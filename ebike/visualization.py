@@ -89,7 +89,9 @@ def plot_results(results):
         plt.show()
 
 
-def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
+def generate_plot(
+    solvers, solver_labels, solver_colors, scenarios, robot, output_prefix
+):
     with sqlite3.connect("results.db") as conn:
         cur = conn.cursor()
         time_plot = plt.figure()
@@ -108,7 +110,9 @@ def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
         it_ax.set_ylim(0, 1)
         count_max = 0
         for scenario in scenarios:
-            for solver, solver_label in zip_longest(solvers, solver_labels):
+            for i, (solver, solver_label, solver_color) in enumerate(
+                zip_longest(solvers, solver_labels, solver_colors)
+            ):
                 cur.execute(
                     "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
                     (scenario, robot, solver),
@@ -133,15 +137,20 @@ def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
                         label = scenario
                     else:
                         label = solver_label or solver
+                    color = (
+                        plt.cm.tab20(solver_color) if solver_color else plt.cm.tab10(i)
+                    )
                     time_ax.plot(
                         np.sort(ik_time[reached == 1] * 1000),
                         np.arange(np.sum(reached == 1)) / (len(reached) - 1),
                         label=label,
+                        color=color,
                     )
                     it_ax.plot(
                         np.sort(count[reached == 1]),
                         np.arange(np.sum(reached == 1)) / (len(reached) - 1),
                         label=label,
+                        color=color,
                     )
                     if np.sum(count[reached == 1]) > 0:
                         count_max = max(count_max, np.max(count[reached == 1]))
@@ -165,9 +174,15 @@ def generate_plot(solvers, solver_labels, scenarios, robot, output_prefix):
             dpi=300,
             bbox_inches="tight",
         )
-        it_ax.set_xlim(0, 10)
+        it_ax.set_xlim(0, 100)
         it_plot.savefig(
             f"{output_prefix}_iterations_detail.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        it_ax.set_xlim(0, 10)
+        it_plot.savefig(
+            f"{output_prefix}_iterations_detail2.png",
             dpi=300,
             bbox_inches="tight",
         )

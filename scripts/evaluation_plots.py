@@ -12,20 +12,23 @@ if __name__ == "__main__":
         config_file = os.path.join(RESULTS_DIR, folder, "config.txt")
         plots = []
         solver_labels = []
+        solver_colors = []
         with open(config_file, "r") as f:
             robot = f.readline().strip()
             solvers = f.readline().strip().split(",")
-            line = f.readline().strip()
-            if line.startswith("labels:"):
-                solver_labels = line[len("labels:") :].split(",")
-            else:
-                plots.append(line.split(","))
             for line in f.readlines():
-                plots.append(line.strip().split(","))
+                line = line.strip()
+                if line.startswith("labels:"):
+                    solver_labels = line[len("labels:") :].split(",")
+                elif line.startswith("colors:"):
+                    solver_colors = [int(c) for c in line[len("colors:") :].split(",")]
+                else:
+                    plots.append(line.split(","))
         for i, scenarios in enumerate(plots):
             generate_plot(
                 solvers,
                 solver_labels,
+                solver_colors,
                 scenarios,
                 robot,
                 os.path.join(RESULTS_DIR, folder, "plot_" + str(i)),
