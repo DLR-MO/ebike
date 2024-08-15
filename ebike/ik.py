@@ -226,6 +226,12 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
         reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
+        reach_ros.set_parameter("reach_ros.scan_goal", False)
+        reach_ros.set_parameter("reach_ros.scan_with_offset", False)
+        reach_ros.set_parameter("reach_ros.scan_swamp", False)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.dtwist", 1e-5
+        )
 
 
 class BioIKEmptyCostFn(BioIK):
@@ -324,3 +330,30 @@ class BioIKOptlibBFGS(BioIK):
 class BioIKOptlibBFGS4(BioIK):
     name = "Bio_ik_optlib_bfgs"
     mode = "optlib_bfgs_r_4"
+
+
+class BioIKScan(BioIK):
+    name = "BioIKScan"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.scan_goal", True)
+
+
+class BioIKScanOffset(BioIK):
+    name = "BioIKScanOffset"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.scan_with_offset", True)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.dtwist", 0.05
+        )
+
+
+class BioIKScanSwamp(BioIK):
+    name = "BioIKScanSwamp"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.scan_swamp", True)
