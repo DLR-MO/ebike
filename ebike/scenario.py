@@ -82,3 +82,15 @@ class Random(AbstractScenario):
     @property
     def pcd_file(self):
         return "package://ebike/scenarios/random_1000.pcd"
+
+
+class RandomUR(AbstractScenario):
+    name = "random"
+
+    @property
+    def ply_file(self):
+        return None
+
+    @property
+    def pcd_file(self):
+        return "package://ebike/scenarios/random_ur.pcd"
