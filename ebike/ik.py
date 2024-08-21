@@ -205,6 +205,16 @@ class PickIK(AbstractIK):
         )
 
 
+class PickIKLocal(PickIK):
+    name = "PickIKLocal"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.mode", "local"
+        )
+
+
 class BioIK(AbstractIK):
     name = "BioIK"
     mode = "bio2_memetic"
