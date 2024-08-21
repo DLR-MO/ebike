@@ -49,6 +49,7 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
+        reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
         reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
@@ -100,6 +101,14 @@ class RelaxedIKCollisionDistance(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_collision_distance", True)
+
+
+class RelaxedIKCollisionDistanceACM(RelaxedIK):
+    name = "RelaxedIK (CollisionDistanceGoalACM)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_collision_distance2", True)
 
 
 class TracIK(AbstractIK):
@@ -223,6 +232,7 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
+        reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
         reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
@@ -280,6 +290,14 @@ class BioIKCollisionDistance(BioIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_collision_distance", True)
+
+
+class BioIKCollisionDistanceACM(BioIK):
+    name = "BioIK (CollisionDistanceGoalACM)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_collision_distance2", True)
 
 
 class BioIK2MemeticL(BioIK):
