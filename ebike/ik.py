@@ -33,6 +33,13 @@ class KDL(AbstractIK):
 class RelaxedIK(AbstractIK):
     name = "RelaxedIK"
 
+    def __init__(self, opt_solver_name=None):
+        if opt_solver_name is not None:
+            self.opt_solver_name = opt_solver_name
+            self.name += " " + opt_solver_name
+        else:
+            self.opt_solver_name = "LD_SLSQP"
+
     def set_config(self, planning_group):
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver",
@@ -45,6 +52,10 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.kinematics_solver_timeout",
             IK_TIMEOUT,
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.opt_solver",
+            self.opt_solver_name,
         )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
