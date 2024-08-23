@@ -58,6 +58,7 @@ class RelaxedIK(AbstractIK):
             self.opt_solver_name,
         )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
+        reach_ros.set_parameter("reach_ros.use_rcm3", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
@@ -80,6 +81,14 @@ class RelaxedIKRCM(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_rcm", True)
+
+
+class RelaxedIKRCM3(RelaxedIK):
+    name = "RelaxedIK (RCMGoal3)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_rcm3", True)
 
 
 class RelaxedIKLine(RelaxedIK):
@@ -251,6 +260,7 @@ class BioIK(AbstractIK):
             f"robot_description_kinematics.{planning_group}.mode", self.mode
         )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
+        reach_ros.set_parameter("reach_ros.use_rcm3", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
@@ -279,6 +289,14 @@ class BioIKRCM(BioIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_rcm", True)
+
+
+class BioIKRCM3(BioIK):
+    name = "BioIK (RCMGoal3)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_rcm3", True)
 
 
 class BioIKLine(BioIK):
