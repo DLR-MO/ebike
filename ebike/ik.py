@@ -60,6 +60,7 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_rcm3", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
+        reach_ros.set_parameter("reach_ros.use_depth2", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance", False)
         reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
@@ -113,6 +114,14 @@ class RelaxedIKDepth(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_depth", True)
+
+
+class RelaxedIKDepth2(RelaxedIK):
+    name = "RelaxedIK (DepthGoal2)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_depth2", True)
 
 
 class RelaxedIKCollisionDistance(RelaxedIK):
