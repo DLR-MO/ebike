@@ -15,6 +15,7 @@ if __name__ == "__main__":
         plots = []
         solver_labels = []
         solver_colors = []
+        solver_styles = []
         with open(config_file, "r") as f:
             robot = f.readline().strip()
             solvers = f.readline().strip().split(",")
@@ -24,6 +25,8 @@ if __name__ == "__main__":
                     solver_labels = line[len("labels:") :].split(",")
                 elif line.startswith("colors:"):
                     solver_colors = [int(c) for c in line[len("colors:") :].split(",")]
+                elif line.startswith("styles:"):
+                    solver_styles = line[len("styles:") :].split(",")
                 else:
                     plots.append(line.split(","))
         for i, scenarios in enumerate(plots):
@@ -31,6 +34,7 @@ if __name__ == "__main__":
                 solvers,
                 solver_labels,
                 solver_colors,
+                solver_styles,
                 scenarios,
                 robot,
                 os.path.join(RESULTS_DIR, folder, "plot_" + str(i)),

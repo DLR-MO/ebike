@@ -9,6 +9,13 @@ import numpy as np
 from ebike.utils import result_to_df
 
 
+def get(li, i, default):
+    try:
+        return li[i]
+    except IndexError:
+        return default
+
+
 def print_results(results):
     for robot, robot_data in results.items():
         for scenario, scenario_data in robot_data.items():
@@ -90,7 +97,13 @@ def plot_results(results):
 
 
 def generate_plot(
-    solvers, solver_labels, solver_colors, scenarios, robot, output_prefix
+    solvers,
+    solver_labels,
+    solver_colors,
+    solver_styles,
+    scenarios,
+    robot,
+    output_prefix,
 ):
     with sqlite3.connect("results.db") as conn:
         cur = conn.cursor()
@@ -181,7 +194,11 @@ def generate_plot(
                 else:
                     label = solver_label or solver
 
-                color = plt.cm.tab20(solver_color) if solver_color else plt.cm.tab10(i)
+                color = (
+                    plt.cm.tab20(solver_color)
+                    if solver_color is not None
+                    else plt.cm.tab10(i)
+                )
                 cdfs = np.vstack(cdfs)
                 mean_cdf = np.mean(cdfs, axis=0)
                 min_cdf = np.min(cdfs, axis=0)
@@ -191,9 +208,16 @@ def generate_plot(
                     mean_cdf,
                     label=label,
                     color=color,
+                    linestyle=get(solver_styles, i, "solid"),
                 )
                 if use_avg:
-                    time_ax.fill_between(xs, min_cdf, max_cdf, alpha=0.2)
+                    time_ax.fill_between(
+                        xs,
+                        min_cdf,
+                        max_cdf,
+                        alpha=0.2,
+                        color=color,
+                    )
 
                 count_cdfs = np.vstack(count_cdfs)
                 count_mean = np.mean(count_cdfs, axis=0)
@@ -204,10 +228,15 @@ def generate_plot(
                     count_mean,
                     label=label,
                     color=color,
+                    linestyle=get(solver_styles, i, "solid"),
                 )
                 if use_avg:
                     it_ax.fill_between(
-                        np.arange(0, max_count + 1), count_min, count_max, alpha=0.2
+                        np.arange(0, max_count + 1),
+                        count_min,
+                        count_max,
+                        alpha=0.2,
+                        color=color,
                     )
 
                 total_count_max = max(total_count_max, max_count)
@@ -265,27 +294,48 @@ def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
         )
         for scenario in scenarios:
             for solver, solver_label in zip_longest(solvers, solver_labels):
+                n_avg = 3
+                cur.execute(
+                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT ?",
+                    (scenario, robot, solver, n_avg),
+                )
+                fetch_result = cur.fetchall()
+                if len(fetch_result) == 0:
+                    print(f"Skipping {solver} on {scenario} because it does not exist")
+                    continue
+                elif len(fetch_result) < 3:
+                    print(
+                        f"Warning: {solver} on {scenario} only has {len(fetch_result)} runs!"
+                    )
+
+                experiment_ids = [r[0] for r in fetch_result]
+
                 for arr in durations.values():
                     arr.clear()
                 for arr in iterations.values():
                     arr.clear()
-                cur.execute(
-                    "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT 1",
-                    (scenario, robot, solver),
-                )
-                fetch_result = cur.fetchone()
-                if fetch_result is None:
-                    print(f"Skipping {solver} on {scenario} because it does not exist")
-                    continue
+                dur_means = []
+                it_means = []
 
-                experiment_id = fetch_result[0]
+                for experiment_id in experiment_ids:
+                    cur.execute(
+                        "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
+                        (experiment_id,),
+                    )
+                    results = cur.fetchall()
+                    reached, ik_time, count = np.array(results).T
 
-                cur.execute(
-                    "SELECT reached, ik_time, solution_callback_count FROM results WHERE experiment_id = ?",
-                    (experiment_id,),
-                )
-                results = cur.fetchall()
-                reached, ik_time, count = np.array(results).T
+                    for dur, arr in durations.items():
+                        arr.append(np.sum(ik_time[reached == 1] <= dur) / len(reached))
+                    if np.sum([reached == 1]) > 0:
+                        dur_means.append(np.mean(ik_time[reached == 1]))
+                        it_means.append(np.mean(count[reached == 1]))
+                    else:
+                        dur_means.append(0)
+                        it_means.append(0)
+                    for nit, arr in iterations.items():
+                        arr.append(np.sum(count[reached == 1] <= nit) / len(reached))
+
                 if len(scenarios) > 1 and len(solvers) > 1:
                     label = f"{solver_label or solver} on {scenario}"
                 elif len(scenarios) > 1:
@@ -293,24 +343,14 @@ def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
                 else:
                     label = solver_label or solver
 
-                for dur, arr in durations.items():
-                    arr.append(np.sum(ik_time[reached == 1] <= dur) / len(reached))
-                if np.sum([reached == 1]) > 0:
-                    dur_mean = np.mean(ik_time[reached == 1])
-                    it_mean = np.mean(count[reached == 1])
-                else:
-                    dur_mean = 0
-                    it_mean = 0
-                for nit, arr in iterations.items():
-                    arr.append(np.sum(count[reached == 1] <= nit) / len(reached))
                 time_table += f'"{label}", '
                 for arr in durations.values():
                     time_table += f'"{np.mean(arr)*100:.1f}%", '
-                time_table += f'"{dur_mean*1000:.3f}ms",\n'
+                time_table += f'"{np.mean(dur_means)*1000:.3f}ms",\n'
                 count_table += f'"{label}", '
                 for arr in iterations.values():
                     count_table += f'"{np.mean(arr)*100:.1f}%", '
-                count_table += f'"{it_mean:.3f} its",\n'
+                count_table += f'"{np.mean(it_means):.3f} its",\n'
         with open(output_prefix + ".txt", "w") as text_file:
             text_file.write(
                 '#figure(\nplacement: auto,\ncaption: "",\ngrid(inset: 5pt,\n'
