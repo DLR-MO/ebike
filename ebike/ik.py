@@ -268,6 +268,15 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.mode", self.mode
         )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.population_size2", 2
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.child_count", 16
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.memetic_opt_gens", 8
+        )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
         reach_ros.set_parameter("reach_ros.use_rcm3", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
@@ -281,6 +290,22 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.scan_swamp", False)
         reach_ros.set_parameter(
             f"robot_description_kinematics.{planning_group}.dtwist", 1e-5
+        )
+
+
+class BioIKNewParams(BioIK):
+    name = "BioIK (new parameters)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.population_size2", 4
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.child_count", 32
+        )
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.memetic_opt_gens", 16
         )
 
 
