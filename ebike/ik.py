@@ -58,6 +58,7 @@ class RelaxedIK(AbstractIK):
             self.opt_solver_name,
         )
         reach_ros.set_parameter("reach_ros.use_rcm", False)
+        reach_ros.set_parameter("reach_ros.use_rcm2", False)
         reach_ros.set_parameter("reach_ros.use_rcm3", False)
         reach_ros.set_parameter("reach_ros.use_depth", False)
         reach_ros.set_parameter("reach_ros.use_depth2", False)
@@ -82,6 +83,14 @@ class RelaxedIKRCM(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_rcm", True)
+
+
+class RelaxedIKRCM2(RelaxedIK):
+    name = "RelaxedIK (RCMGoal2)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_rcm2", True)
 
 
 class RelaxedIKRCM3(RelaxedIK):
