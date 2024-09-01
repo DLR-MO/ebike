@@ -307,7 +307,7 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.scan_with_offset", False)
         reach_ros.set_parameter("reach_ros.scan_swamp", False)
         reach_ros.set_parameter(
-            f"robot_description_kinematics.{planning_group}.dtwist", 1e-5
+            f"robot_description_kinematics.{planning_group}.keep_seed", False
         )
 
 
@@ -475,3 +475,13 @@ class BioIKScanSwamp(BioIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.scan_swamp", True)
+
+
+class BioIKKeepSeed(BioIK):
+    name = "BioIKKeepSeed"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter(
+            f"robot_description_kinematics.{planning_group}.keep_seed", True
+        )
