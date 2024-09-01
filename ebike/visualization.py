@@ -203,13 +203,13 @@ def generate_plot(
                 mean_cdf = np.mean(cdfs, axis=0)
                 min_cdf = np.min(cdfs, axis=0)
                 max_cdf = np.max(cdfs, axis=0)
-                time_ax.plot(
-                    xs,
-                    mean_cdf,
-                    label=label,
-                    color=color,
-                    linestyle=get(solver_styles, i, "solid"),
-                )
+                if get(solver_styles, i, "solid") == "solid" and scenario.endswith(
+                    "seed"
+                ):
+                    style = "dotted"
+                else:
+                    style = get(solver_styles, i, "solid")
+                time_ax.plot(xs, mean_cdf, label=label, color=color, linestyle=style)
                 if use_avg:
                     time_ax.fill_between(
                         xs,
@@ -228,7 +228,7 @@ def generate_plot(
                     count_mean,
                     label=label,
                     color=color,
-                    linestyle=get(solver_styles, i, "solid"),
+                    linestyle=style,
                 )
                 if use_avg:
                     it_ax.fill_between(
