@@ -114,6 +114,15 @@ class RelaxedIKLineAlignment(RelaxedIK):
 
     def set_config(self, planning_group):
         super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_line_goal", True)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", True)
+
+
+class RelaxedIKAlignment(RelaxedIK):
+    name = "RelaxedIK (AlignmentGoal)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_line_alignment", True)
 
 
@@ -352,6 +361,15 @@ class BioIKLine(BioIK):
 
 class BioIKLineAlignment(BioIK):
     name = "BioIK (LineGoal with AlignmentGoal)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_line_goal", True)
+        reach_ros.set_parameter("reach_ros.use_line_alignment", True)
+
+
+class BioIKAlignment(BioIK):
+    name = "BioIK (AlignmentGoal)"
 
     def set_config(self, planning_group):
         super().set_config(planning_group)
