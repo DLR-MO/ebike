@@ -16,6 +16,35 @@ def get(li, i, default):
         return default
 
 
+COLORS = [
+    "#3f90da",
+    "#ffa90e",
+    "#bd1f01",
+    "#94a4a2",
+    "#832db6",
+    "#a96b59",
+    "#e76300",
+    "#b9ac70",
+    "#717581",
+    "#92dadd",
+]
+SOLVER_COLORS = ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"]
+
+
+def get_solver_colors(solvers):
+    return_colors = []
+    solvers_to_colors = ["BioIK", "RelaxedIK", "TracIK", "PickIK", "KDL"]
+    for solver in solvers:
+        for color, prefix in zip(SOLVER_COLORS, solvers_to_colors):
+            if solver.startswith(prefix):
+                return_colors.append(color)
+                break
+        else:
+            print("Unknown solver:", solver)
+            return_colors.append(COLORS[-1])
+    return return_colors
+
+
 def print_results(results):
     for robot, robot_data in results.items():
         for scenario, scenario_data in robot_data.items():
@@ -122,6 +151,10 @@ def generate_plot(
         it_ax.set_title("Solver iterations" + title_suffix)
         it_ax.set_ylim(0, 1)
         total_count_max = 0
+        if solver_colors == ["fixed"]:
+            solver_colors = get_solver_colors(solvers)
+        else:
+            solver_colors = COLORS
         for scenario in scenarios:
             for i, (solver, solver_label, solver_color) in enumerate(
                 zip_longest(solvers, solver_labels, solver_colors)
@@ -194,11 +227,6 @@ def generate_plot(
                 else:
                     label = solver_label or solver
 
-                color = (
-                    plt.cm.tab20(solver_color)
-                    if solver_color is not None
-                    else plt.cm.tab10(i)
-                )
                 cdfs = np.vstack(cdfs)
                 mean_cdf = np.mean(cdfs, axis=0)
                 min_cdf = np.min(cdfs, axis=0)
@@ -209,14 +237,20 @@ def generate_plot(
                     style = "dotted"
                 else:
                     style = get(solver_styles, i, "solid")
-                time_ax.plot(xs, mean_cdf, label=label, color=color, linestyle=style)
+                time_ax.plot(
+                    xs,
+                    mean_cdf,
+                    label=label,
+                    color=solver_color,
+                    linestyle=style,
+                )
                 if use_avg:
                     time_ax.fill_between(
                         xs,
                         min_cdf,
                         max_cdf,
                         alpha=0.2,
-                        color=color,
+                        color=solver_color,
                     )
 
                 count_cdfs = np.vstack(count_cdfs)
@@ -227,7 +261,7 @@ def generate_plot(
                     np.arange(0, max_count + 1),
                     count_mean,
                     label=label,
-                    color=color,
+                    color=solver_color,
                     linestyle=style,
                 )
                 if use_avg:
@@ -236,7 +270,7 @@ def generate_plot(
                         count_min,
                         count_max,
                         alpha=0.2,
-                        color=color,
+                        color=solver_color,
                     )
 
                 total_count_max = max(total_count_max, max_count)
