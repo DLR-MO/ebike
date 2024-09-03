@@ -17,7 +17,7 @@ class AbstractRobot:
 
 
 class UR10(AbstractRobot):
-    name = "ur10"
+    name = "UR10"
 
     def set_config(self):
         xacro_file = (

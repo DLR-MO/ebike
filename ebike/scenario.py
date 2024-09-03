@@ -53,27 +53,27 @@ class AbstractScenario:
 
 
 class Table(AbstractScenario):
-    name = "table"
+    name = "Table"
 
 
 class SmallTable(AbstractScenario):
-    name = "small_table"
+    name = "SmallTable"
 
 
 class TableObjects(AbstractScenario):
-    name = "table_objects"
+    name = "TableObjects"
 
 
 class Shelf(AbstractScenario):
-    name = "shelf"
+    name = "Shelf"
 
 
 class Barrel(AbstractScenario):
-    name = "barrel"
+    name = "Barrel"
 
 
 class Random(AbstractScenario):
-    name = "random"
+    name = "Random"
 
     @property
     def ply_file(self):
@@ -85,7 +85,7 @@ class Random(AbstractScenario):
 
 
 class RandomUR(AbstractScenario):
-    name = "random"
+    name = "Random"
 
     @property
     def ply_file(self):
