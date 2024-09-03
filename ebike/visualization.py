@@ -9,7 +9,7 @@ import numpy as np
 from ebike.utils import result_to_df
 
 
-def get(li, i, default):
+def get(li, i, default=None):
     try:
         return li[i]
     except IndexError:
@@ -154,11 +154,18 @@ def generate_plot(
         if solver_colors == ["fixed"]:
             solver_colors = get_solver_colors(solvers)
         else:
-            solver_colors = COLORS
+            solver_colors = COLORS[: len(solvers)]
+        if "KDL" not in solvers and solver_colors[0] == "fixed":
+            solvers.append("KDL")
+            solver_labels.append("KDL")
+            solver_colors.extend(get_solver_colors(["KDL"]))
+            append_kdl = True
+        else:
+            append_kdl = False
         for scenario in scenarios:
-            for i, (solver, solver_label, solver_color) in enumerate(
-                zip_longest(solvers, solver_labels, solver_colors)
-            ):
+            for i, solver in enumerate(solvers):
+                solver_label = get(solver_labels, i)
+                solver_color = solver_colors[i]
                 n_avg = 3
                 cur.execute(
                     "SELECT id FROM experiments WHERE scenario = ? AND robot = ? AND solver = ? ORDER BY id DESC LIMIT ?",
@@ -231,8 +238,9 @@ def generate_plot(
                 mean_cdf = np.mean(cdfs, axis=0)
                 min_cdf = np.min(cdfs, axis=0)
                 max_cdf = np.max(cdfs, axis=0)
-                if get(solver_styles, i, "solid") == "solid" and scenario.endswith(
-                    "seed"
+                if (
+                    get(solver_styles, i, "solid") == "solid"
+                    and "seed" in scenario.lower()
                 ):
                     style = "dotted"
                 else:
@@ -243,6 +251,7 @@ def generate_plot(
                     label=label,
                     color=solver_color,
                     linestyle=style,
+                    alpha=1 if not (solver == "KDL" and append_kdl) else 0.3,
                 )
                 if use_avg:
                     time_ax.fill_between(
@@ -263,6 +272,7 @@ def generate_plot(
                     label=label,
                     color=solver_color,
                     linestyle=style,
+                    alpha=1 if not (solver == "KDL" and append_kdl) else 0.3,
                 )
                 if use_avg:
                     it_ax.fill_between(
@@ -279,6 +289,8 @@ def generate_plot(
         time_ax.legend()
         time_ax.set_xlim(0, 1000)
         time_plot.savefig(f"{output_prefix}.png", dpi=300, bbox_inches="tight")
+        time_ax.set_xlim(0, 100)
+        time_plot.savefig(f"{output_prefix}_100.png", dpi=300, bbox_inches="tight")
         time_ax.set_xlim(0, 50)
         time_plot.savefig(f"{output_prefix}_detail.png", dpi=300, bbox_inches="tight")
         time_ax.set_xlim(0, 5)

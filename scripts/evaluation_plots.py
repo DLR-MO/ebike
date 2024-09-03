@@ -11,6 +11,8 @@ if __name__ == "__main__":
             continue
         if folder.startswith("_"):
             continue
+        if os.path.exists(os.path.join(RESULTS_DIR, folder, "SKIP")):
+            continue
         config_file = os.path.join(RESULTS_DIR, folder, "config.txt")
         plots = []
         solver_labels = []
@@ -24,7 +26,7 @@ if __name__ == "__main__":
                 if line.startswith("labels:"):
                     solver_labels = line[len("labels:") :].split(",")
                 elif line.startswith("colors:"):
-                    solver_colors = [int(c) for c in line[len("colors:") :].split(",")]
+                    solver_colors = line[len("colors:") :].split(",")
                 elif line.startswith("styles:"):
                     solver_styles = line[len("styles:") :].split(",")
                 else:
