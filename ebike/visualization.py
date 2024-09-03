@@ -128,7 +128,7 @@ def plot_results(results):
 def generate_plot(
     solvers,
     solver_labels,
-    solver_colors,
+    colors,
     solver_styles,
     scenarios,
     robot,
@@ -151,11 +151,11 @@ def generate_plot(
         it_ax.set_title("Solver iterations" + title_suffix)
         it_ax.set_ylim(0, 1)
         total_count_max = 0
-        if solver_colors == ["fixed"]:
+        if colors == ["fixed"]:
             solver_colors = get_solver_colors(solvers)
         else:
             solver_colors = COLORS[: len(solvers)]
-        if "KDL" not in solvers and solver_colors[0] == "fixed":
+        if "KDL" not in solvers and colors[0] == "fixed":
             solvers.append("KDL")
             solver_labels.append("KDL")
             solver_colors.extend(get_solver_colors(["KDL"]))
