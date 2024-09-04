@@ -155,7 +155,7 @@ def generate_plot(
             solver_colors = get_solver_colors(solvers)
         else:
             solver_colors = COLORS[: len(solvers)]
-        if "KDL" not in solvers and colors[0] == "fixed":
+        if "KDL" not in solvers and get(colors, 0) == "fixed":
             solvers.append("KDL")
             solver_colors.extend(get_solver_colors(["KDL"]))
             append_kdl = True

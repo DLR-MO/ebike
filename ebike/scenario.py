@@ -3,6 +3,7 @@
 
 class AbstractScenario:
     name = None
+    file_name = None
     hole_position = []
     hole_axis = []
 
@@ -45,31 +46,36 @@ class AbstractScenario:
 
     @property
     def ply_file(self):
-        return f"package://ebike/scenarios/{self.name}.ply"
+        return f"package://ebike/scenarios/{self.file_name}.ply"
 
     @property
     def pcd_file(self):
-        return f"package://ebike/scenarios/{self.name}.pcd"
+        return f"package://ebike/scenarios/{self.file_name}.pcd"
 
 
 class Table(AbstractScenario):
     name = "Table"
+    file_name = "table"
 
 
 class SmallTable(AbstractScenario):
     name = "SmallTable"
+    file_name = "small_table"
 
 
 class TableObjects(AbstractScenario):
     name = "TableObjects"
+    file_name = "table_objects"
 
 
 class Shelf(AbstractScenario):
     name = "Shelf"
+    file_name = "shelf"
 
 
 class Barrel(AbstractScenario):
     name = "Barrel"
+    file_name = "barrel"
 
 
 class Random(AbstractScenario):
