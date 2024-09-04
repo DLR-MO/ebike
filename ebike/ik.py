@@ -303,6 +303,7 @@ class BioIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_collision_distance2", False)
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
+        reach_ros.set_parameter("reach_ros.use_look_at", False)
         reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
         reach_ros.set_parameter("reach_ros.scan_goal", False)
         reach_ros.set_parameter("reach_ros.scan_with_offset", False)
@@ -375,6 +376,14 @@ class BioIKAlignment(BioIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_line_alignment", True)
+
+
+class BioIKLookAt(BioIK):
+    name = "BioIK (LookAtGoal)"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.use_look_at", True)
 
 
 class BioIKDepth(BioIK):
