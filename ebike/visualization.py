@@ -138,8 +138,8 @@ def generate_plot(
         cur = conn.cursor()
         time_plot = plt.figure()
         time_ax = time_plot.subplots()
-        if len(scenarios) == 1:
-            title_suffix = f", {robot} on {scenarios[0]}"
+        if len(os.path.commonprefix(scenarios)) > 3:  # implicit if there is only one
+            title_suffix = f", {robot} on {os.path.commonprefix(scenarios)}"
         elif len(solvers) == 1:
             title_suffix = f", {robot} using {solvers[0]}"
         else:
@@ -151,19 +151,24 @@ def generate_plot(
         it_ax.set_title("Solver iterations" + title_suffix)
         it_ax.set_ylim(0, 1)
         total_count_max = 0
-        if colors == ["fixed"]:
+        if not colors:
+            solver_colors = COLORS[: len(solvers)]
+        elif colors == ["fixed"]:
             solver_colors = get_solver_colors(solvers)
         else:
-            solver_colors = COLORS[: len(solvers)]
+            solver_colors = colors
         if "KDL" not in solvers and get(colors, 0) == "fixed":
             solvers.append("KDL")
             solver_colors.extend(get_solver_colors(["KDL"]))
             append_kdl = True
         else:
             append_kdl = False
-        for scenario in scenarios:
+        for s, scenario in enumerate(scenarios):
             for i, solver in enumerate(solvers):
-                solver_label = get(solver_labels, i)
+                if append_kdl and solver == "KDL" and "seed" in scenario.lower():
+                    continue
+                ti = s * len(solvers) + i
+                solver_label = get(solver_labels, ti)
                 solver_color = solver_colors[i]
                 n_avg = 3
                 cur.execute(
@@ -226,24 +231,26 @@ def generate_plot(
                         counts = np.pad(counts, (0, max_count - len(counts)), "edge")
                     count_cdfs.append(np.concatenate([[0], np.cumsum(counts) / 1000]))
 
-                if len(scenarios) > 1 and len(solvers) > 1:
-                    label = f"{solver_label or solver} on {scenario}"
+                if solver_label:
+                    label = solver_label
+                elif len(scenarios) > 1 and len(solvers) > 1:
+                    label = f"{solver} on {scenario}"
                 elif len(scenarios) > 1:
                     label = scenario
                 else:
-                    label = solver_label or solver
+                    label = solver
 
                 cdfs = np.vstack(cdfs)
                 mean_cdf = np.mean(cdfs, axis=0)
                 min_cdf = np.min(cdfs, axis=0)
                 max_cdf = np.max(cdfs, axis=0)
                 if (
-                    get(solver_styles, i, "solid") == "solid"
+                    get(solver_styles, ti, "solid") == "solid"
                     and "seed" in scenario.lower()
                 ):
                     style = "dotted"
                 else:
-                    style = get(solver_styles, i, "solid")
+                    style = get(solver_styles, ti, "solid")
                 time_ax.plot(
                     xs,
                     mean_cdf,
