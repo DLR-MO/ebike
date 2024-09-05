@@ -67,6 +67,7 @@ class RelaxedIK(AbstractIK):
         reach_ros.set_parameter("reach_ros.use_line_goal", False)
         reach_ros.set_parameter("reach_ros.use_line_alignment", False)
         reach_ros.set_parameter("reach_ros.empty_cost_fn", False)
+        reach_ros.set_parameter("reach_ros.scan_goal", False)
 
 
 class RelaxedIKEmptyCostFn(RelaxedIK):
@@ -156,6 +157,23 @@ class RelaxedIKCollisionDistanceACM(RelaxedIK):
     def set_config(self, planning_group):
         super().set_config(planning_group)
         reach_ros.set_parameter("reach_ros.use_collision_distance2", True)
+
+
+class RelaxedIKScan(RelaxedIK):
+    name = "RelaxedIKScan"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.scan_goal", True)
+
+
+class RelaxedIKScanRCM(RelaxedIK):
+    name = "RelaxedIKScanRCM"
+
+    def set_config(self, planning_group):
+        super().set_config(planning_group)
+        reach_ros.set_parameter("reach_ros.scan_goal", True)
+        reach_ros.set_parameter("reach_ros.use_rcm", True)
 
 
 class TracIK(AbstractIK):
