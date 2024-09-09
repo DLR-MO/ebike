@@ -16,7 +16,7 @@ class AbstractScenario:
                 "max_threads": 1,
             },
             "ik_solver": {
-                "name": "MoveItIKSolver",
+                "name": "BenchmarkIKSolver",
                 "distance_threshold": 0.0,
                 "planning_group": planning_group,
                 "collision_mesh_filename": self.ply_file,

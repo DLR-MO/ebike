@@ -34,7 +34,12 @@ class Benchmark:
 
     def run(self):
         results_dir = tempfile.mkdtemp()
-        os.environ["REACH_PLUGINS"] = "reach_ros_plugins"
+        if "REACH_PLUGINS" in os.environ:
+            os.environ["REACH_PLUGINS"] = (
+                os.environ["REACH_PLUGINS"] + ":reach_ros_plugins"
+            )
+        else:
+            os.environ["REACH_PLUGINS"] = "reach_ros_plugins"
         for robot in self.robots:
             robot.set_config()
             for scenario in self.scenarios:
