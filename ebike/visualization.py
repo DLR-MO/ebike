@@ -33,7 +33,14 @@ SOLVER_COLORS = ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd
 
 def get_solver_colors(solvers):
     return_colors = []
-    solvers_to_colors = ["BioIK", "RelaxedIK", "TracIK", "PickIK", "KDL"]
+    solvers_to_colors = [
+        "BioIK",
+        "RelaxedIK",
+        "TracIK",
+        "PickIK",
+        "KDL",
+        "DecouplingIK",
+    ]
     for solver in solvers:
         for color, prefix in zip(SOLVER_COLORS, solvers_to_colors):
             if solver.startswith(prefix):
