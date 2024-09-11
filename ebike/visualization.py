@@ -157,6 +157,10 @@ def generate_plot(
         it_ax = it_plot.subplots()
         it_ax.set_title("Solver iterations" + title_suffix)
         it_ax.set_ylim(0, 1)
+        bar_plot = plt.figure()
+        bar_ax = bar_plot.subplots()
+        bar_ax.set_title("Solve rates" + title_suffix)
+        bar_ax.set_ylim(0, 1)
         total_count_max = 0
         if not colors:
             solver_colors = COLORS[: len(solvers)]
@@ -170,6 +174,7 @@ def generate_plot(
             append_kdl = True
         else:
             append_kdl = False
+        bar_dict = {}
         for s, scenario in enumerate(scenarios):
             for i, solver in enumerate(solvers):
                 if append_kdl and solver == "KDL" and "seed" in scenario.lower():
@@ -297,6 +302,10 @@ def generate_plot(
                     )
 
                 total_count_max = max(total_count_max, max_count)
+                if len(mean_cdf) == 0:
+                    bar_dict[label] = 0
+                else:
+                    bar_dict[label] = np.max(mean_cdf)
         time_ax.set_xlabel("Duration (ms)")
         time_ax.set_ylabel("Fraction solved")
         time_ax.legend()
@@ -332,6 +341,18 @@ def generate_plot(
             bbox_inches="tight",
         )
         plt.close(it_plot)
+
+        bar_ax.bar(
+            bar_dict.keys(),
+            bar_dict.values(),
+            color=solver_colors,
+        )
+        bar_plot.savefig(
+            f"{output_prefix}_bar.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        plt.close(bar_plot)
 
 
 def generate_table(solvers, solver_labels, scenarios, robot, output_prefix):
