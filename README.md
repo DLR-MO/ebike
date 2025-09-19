@@ -57,3 +57,6 @@ The experiments were run on the UR10 robot with the four default scenarios.
 <img src="images/ur10_barrel_rates.png" width="49%" />
 <img src="images/ur10_barrel_times.png" width="49%" />
 </p>
+
+## Further Information
+For more information see also Chapter 5 from https://elib.dlr.de/210480/
