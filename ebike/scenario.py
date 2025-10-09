@@ -3,10 +3,11 @@
 
 class AbstractScenario:
     name = None
+    file_name = None
+    hole_position = []
+    hole_axis = []
 
     def get_config(self, planning_group):
-        ply_file = f"package://ebike/scenarios/{self.name}.ply"
-        pcd_file = f"package://ebike/scenarios/{self.name}.pcd"
         reach_config = {
             "optimization": {
                 "radius": 0.2,
@@ -15,41 +16,87 @@ class AbstractScenario:
                 "max_threads": 1,
             },
             "ik_solver": {
-                "name": "MoveItIKSolver",
+                "name": "BenchmarkIKSolver",
                 "distance_threshold": 0.0,
                 "planning_group": planning_group,
-                "collision_mesh_filename": ply_file,
-                "touch_links": ["end_effector"],
+                "collision_mesh_filename": self.ply_file,
+                "touch_links": ["end_effector", "endo_third_link"],
+                "hole_position": self.hole_position,
+                "hole_axis": self.hole_axis,
             },
             "evaluator": {
                 "name": "NoOpEvaluator",
             },
             "display": {
                 "name": "ROSDisplay",
-                "collision_mesh_filename": ply_file,
+                "collision_mesh_filename": self.ply_file,
                 "kinematic_base_frame": "base_link",
                 "marker_scale": 0.05,
             },
             "target_pose_generator": {
                 "name": "PointCloudTargetPoseGenerator",
-                "pcd_file": pcd_file,
+                "pcd_file": self.pcd_file,
             },
             "logger": {"name": "BoostProgressConsoleLogger"},
         }
+        if self.ply_file is None:
+            del reach_config["ik_solver"]["collision_mesh_filename"]
+            del reach_config["display"]["collision_mesh_filename"]
         return reach_config
+
+    @property
+    def ply_file(self):
+        return f"package://ebike/scenarios/{self.file_name}.ply"
+
+    @property
+    def pcd_file(self):
+        return f"package://ebike/scenarios/{self.file_name}.pcd"
 
 
 class Table(AbstractScenario):
-    name = "table"
+    name = "Table"
+    file_name = "table"
 
 
 class SmallTable(AbstractScenario):
-    name = "small_table"
+    name = "SmallTable"
+    file_name = "small_table"
 
 
-class Kallax(AbstractScenario):
-    name = "kallax"
+class TableObjects(AbstractScenario):
+    name = "TableObjects"
+    file_name = "table_objects"
+
+
+class Shelf(AbstractScenario):
+    name = "Shelf"
+    file_name = "shelf"
 
 
 class Barrel(AbstractScenario):
-    name = "barrel"
+    name = "Barrel"
+    file_name = "barrel"
+
+
+class Random(AbstractScenario):
+    name = "Random"
+
+    @property
+    def ply_file(self):
+        return None
+
+    @property
+    def pcd_file(self):
+        return "package://ebike/scenarios/random_1000.pcd"
+
+
+class RandomUR(AbstractScenario):
+    name = "Random"
+
+    @property
+    def ply_file(self):
+        return None
+
+    @property
+    def pcd_file(self):
+        return "package://ebike/scenarios/random_ur.pcd"
