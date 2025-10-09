@@ -23,6 +23,7 @@ Depending on the IKs you want to test, you should also clone the following:
 - [BioIK](https://github.com/PickNikRobotics/bio_ik), use the ros2 branch
 - [TracIK](https://bitbucket.org/traclabs/trac_ik), use the `rolling-devel` branch
 - [PickIK](https://github.com/PickNikRobotics/pick_ik)
+- [RelaxedIK](https://github.com/timonegk/relaxed_ik_cpp)
 
 ## Usage
 
